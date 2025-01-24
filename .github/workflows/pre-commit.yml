@@ -5,6 +5,7 @@ on:
     paths:
       - "**/*.py"
       - "**.yml"
+      - "**.yaml"
   workflow_dispatch:
 
 jobs:
