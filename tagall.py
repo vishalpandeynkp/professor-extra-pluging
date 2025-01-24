@@ -1,13 +1,18 @@
 import asyncio
+
 from pyrogram import filters
 from pyrogram.enums import ChatMembersFilter, ChatMemberStatus
 from pyrogram.errors import FloodWait
+
 
 SPAM_CHATS = []
 
 
 @app.on_message(
-    filters.command(["all", "allmention", "mentionall", "tagall"] & filters.admin, prefixes=["/", "@"])
+    filters.command(
+        ["all", "allmention", "mentionall", "tagall"] & filters.admin,
+        prefixes=["/", "@"],
+    )
 )
 async def tag_all_users(_, message):
     if message.chat.id in SPAM_CHATS:
@@ -173,6 +178,7 @@ async def tag_all_admins(_, message):
         except Exception:
             pass
 
+
 @app.on_message(
     filters.command(["admin", "admins", "report"], prefixes=["/", "@"]) & filters.group
 )
@@ -191,7 +197,7 @@ async def admintag_with_reporting(client, message):
     reply_user_id = reply.from_user.id if reply.from_user else reply.sender_chat.id
     linked_chat = (await client.get_chat(chat_id)).linked_chat
     user = await app.get_chat_member(chat_id, reply_user_id)
-   
+
     if reply_user_id == app.id:
         return await message.reply_text("Why would I report myself?")
     elif user.status == ChatMemberStatus.OWNER:
@@ -208,7 +214,9 @@ async def admintag_with_reporting(client, message):
     user_mention = reply.from_user.mention if reply.from_user else "the user"
     text = f"Reported {user_mention} to admins!."
 
-    async for m in app.get_chat_members(chat_id, filter=ChatMembersFilter.ADMINISTRATORS):
+    async for m in app.get_chat_members(
+        chat_id, filter=ChatMembersFilter.ADMINISTRATORS
+    ):
         if not m.user.is_bot and not m.user.is_deleted:
             text += f"[\u2063](tg://user?id={m.user.id})"
 
@@ -250,7 +258,7 @@ __HELP__ = """
 
 **/admins | @admins | /report [text] or [reply to any message]** - To tag all admins in your group.
 
-> If an admin uses this command, it will mention all admins in the group. 
+> If an admin uses this command, it will mention all admins in the group.
 
 > If a regular user uses this command, it will be treated as a report and notify all admins.
 
