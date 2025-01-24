@@ -1,34 +1,15 @@
 import asyncio
-
 from pyrogram import filters
-from pyrogram.enums import ChatMembersFilter
+from pyrogram.enums import ChatMembersFilter, ChatMemberStatus
 from pyrogram.errors import FloodWait
-from YukkiMusic import app
-
 
 SPAM_CHATS = []
 
 
-async def is_admin(chat_id, user_id):
-    admin_ids = [
-        admin.user.id
-        async for admin in app.get_chat_members(
-            chat_id, filter=ChatMembersFilter.ADMINISTRATORS
-        )
-    ]
-    if user_id in admin_ids:
-        return True
-    return False
-
-
 @app.on_message(
-    filters.command(["all", "allmention", "mentionall", "tagall"], prefixes=["/", "@"])
+    filters.command(["all", "allmention", "mentionall", "tagall"] & filters.admin, prefixes=["/", "@"])
 )
 async def tag_all_users(_, message):
-    admin = await is_admin(message.chat.id, message.from_user.id)
-    if not admin:
-        return
-
     if message.chat.id in SPAM_CHATS:
         return await message.reply_text(
             "ᴛᴀɢɢɪɴɢ ᴘʀᴏᴄᴇss ɪs ᴀʟʀᴇᴀᴅʏ ʀᴜɴɴɪɴɢ ɪғ ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ sᴛᴏᴘ sᴏ ᴜsᴇ /cancel"
@@ -50,7 +31,8 @@ async def tag_all_users(_, message):
                 if m.user.is_deleted or m.user.is_bot:
                     continue
                 usernum += 1
-                usertxt += f"[{m.user.first_name}](tg://user?id={m.user.id})  "
+                name = f"{m.user.first_name} {m.user.last_name or ''}".strip()
+                usertxt += f"[{name}](tg://user?id={m.user.id})  "
                 if usernum == 7:
                     await replied.reply_text(
                         usertxt,
@@ -83,7 +65,8 @@ async def tag_all_users(_, message):
                 if m.user.is_deleted or m.user.is_bot:
                     continue
                 usernum += 1
-                usertxt += f"[{m.user.first_name}](tg://user?id={m.user.id})  "
+                name = f"{m.user.first_name} {m.user.last_name or ''}".strip()
+                usertxt += f"[{name}](tg://user?id={m.user.id})  "
                 if usernum == 7:
                     await app.send_message(
                         message.chat.id,
@@ -131,7 +114,8 @@ async def tag_all_admins(_, message):
                 if m.user.is_deleted or m.user.is_bot:
                     continue
                 usernum += 1
-                usertxt += f"[{m.user.first_name}](tg://user?id={m.user.id})  "
+                name = f"{m.user.first_name} {m.user.last_name or ''}".strip()
+                usertxt += f"[{name}](tg://user?id={m.user.id})  "
                 if usernum == 7:
                     await replied.reply_text(
                         usertxt,
@@ -165,7 +149,8 @@ async def tag_all_admins(_, message):
                 if m.user.is_deleted or m.user.is_bot:
                     continue
                 usernum += 1
-                usertxt += f"[{m.user.first_name}](tg://user?id={m.user.id})  "
+                name = f"{m.user.first_name} {m.user.last_name or ''}".strip()
+                usertxt += f"[{name}](tg://user?id={m.user.id})  "
                 if usernum == 7:
                     await app.send_message(
                         message.chat.id,
@@ -188,7 +173,6 @@ async def tag_all_admins(_, message):
         except Exception:
             pass
 
-
 @app.on_message(
     filters.command(["admin", "admins", "report"], prefixes=["/", "@"]) & filters.group
 )
@@ -197,19 +181,7 @@ async def admintag_with_reporting(client, message):
         return
     chat_id = message.chat.id
     from_user_id = message.from_user.id
-    admins = [
-        admin.user.id
-        async for admin in client.get_chat_members(
-            chat_id, filter=ChatMembersFilter.ADMINISTRATORS
-        )
-    ]
-    if message.command[0] == "report":
-        if from_user_id in admins:
-            return await message.reply_text(
-                "ᴏᴘᴘs! ʏᴏᴜ ᴀʀᴇ ʟᴏᴏᴋs ʟɪᴋᴇ ᴀɴ ᴀᴅᴍɪɴ!\nʏᴏᴜ ᴄᴀɴ'ᴛ ʀᴇᴘᴏʀᴛ ᴀɴʏ ᴜsᴇʀs ᴛᴏ ᴀᴅᴍɪɴ"
-            )
-
-    if from_user_id in admins:
+    if message.chat.is_admin:
         return await tag_all_admins(client, message)
 
     if len(message.text.split()) <= 1 and not message.reply_to_message:
@@ -218,10 +190,14 @@ async def admintag_with_reporting(client, message):
     reply = message.reply_to_message or message
     reply_user_id = reply.from_user.id if reply.from_user else reply.sender_chat.id
     linked_chat = (await client.get_chat(chat_id)).linked_chat
+    user = await app.get_chat_member(chat_id, reply_user_id)
+   
     if reply_user_id == app.id:
         return await message.reply_text("Why would I report myself?")
-    if (
-        reply_user_id in admins
+    elif user.status == ChatMemberStatus.OWNER:
+        return await message.reply("Do you know who is he/she, OWNER")
+    elif (
+        user.status == ChatMemberStatus.ADMINISTRATOR
         or reply_user_id == chat_id
         or (linked_chat and reply_user_id == linked_chat.id)
     ):
@@ -232,10 +208,9 @@ async def admintag_with_reporting(client, message):
     user_mention = reply.from_user.mention if reply.from_user else "the user"
     text = f"Reported {user_mention} to admins!."
 
-    for admin in admins:
-        admin_member = await client.get_chat_member(chat_id, admin)
-        if not admin_member.user.is_bot and not admin_member.user.is_deleted:
-            text += f"[\u2063](tg://user?id={admin})"
+    async for m in app.get_chat_members(chat_id, filter=ChatMembersFilter.ADMINISTRATORS):
+        if not m.user.is_bot and not m.user.is_deleted:
+            text += f"[\u2063](tg://user?id={m.user.id})"
 
     await reply.reply_text(text)
 
@@ -250,14 +225,12 @@ async def admintag_with_reporting(client, message):
             "mentionoff",
             "cancelall",
         ],
+        & filters.admin
         prefixes=["/", "@"],
     )
 )
 async def cancelcmd(_, message):
     chat_id = message.chat.id
-    admin = await is_admin(chat_id, message.from_user.id)
-    if not admin:
-        return
     if chat_id in SPAM_CHATS:
         try:
             SPAM_CHATS.remove(chat_id)
@@ -273,12 +246,14 @@ async def cancelcmd(_, message):
 __MODULE__ = "Tᴀɢᴀʟʟ"
 __HELP__ = """
 
-@all ᴏʀ /all | /tagall ᴏʀ  @tagall | /mentionall ᴏʀ  @mentionall [ᴛᴇxᴛ] ᴏʀ [ʀᴇᴘʟʏ ᴛᴏ ᴀɴʏ ᴍᴇssᴀɢᴇ] ᴛᴏ ᴛᴀɢ ᴀʟʟ ᴜsᴇʀ's ɪɴ ʏᴏᴜʀ ɢʀᴏᴜᴘ ʙᴛ ʙᴏᴛ
+**@all or /all | /tagall or @tagall | /mentionall or @mentionall [text] or [reply to any message]** - To tag all users in your group using the bot.
 
-/admins | @admins | /report [ᴛᴇxᴛ] ᴏʀ [ʀᴇᴘʟʏ ᴛᴏ ᴀɴʏ ᴍᴇssᴀɢᴇ] ᴛᴏ ᴛᴀɢ ᴀʟʟ ᴀᴅᴍɪɴ's ɪɴ ʏᴏᴜʀ ɢʀᴏᴜᴘ
+**/admins | @admins | /report [text] or [reply to any message]** - To tag all admins in your group.
 
+> If an admin uses this command, it will mention all admins in the group. 
 
-/cancel Oʀ @cancel |  /offmention Oʀ @offmention | /mentionoff Oʀ @mentionoff | /cancelall Oʀ @cancelall - ᴛᴏ sᴛᴏᴘ ʀᴜɴɴɪɴɢ ᴀɴʏ ᴛᴀɢ ᴘʀᴏᴄᴇss
+> If a regular user uses this command, it will be treated as a report and notify all admins.
 
-**__Nᴏᴛᴇ__** Tʜɪs ᴄᴏᴍᴍᴀɴᴅ ᴄᴀɴ ᴏɴʟʏ ᴜsᴇ ᴛʜᴇ Aᴅᴍɪɴs ᴏғ Cʜᴀᴛ ᴀɴᴅ ᴍᴀᴋᴇ Sᴜʀᴇ Bᴏᴛ ᴀɴᴅ ᴀssɪsᴛᴀɴᴛ ɪs ᴀɴ ᴀᴅᴍɪɴ ɪɴ ʏᴏᴜʀ ɢʀᴏᴜᴘ's
+**/cancel or @cancel | /offmention or @offmention | /mentionoff or @mentionoff | /cancelall or @cancelall** - To stop running any tag process.
+
 """
