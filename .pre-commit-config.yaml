@@ -31,7 +31,7 @@ repos:
     rev: v3.19.1
     hooks:
       - id: pyupgrade
-        args: ["--py310-plus"]
+        args: ["--py312-plus"]
         files: \.py$
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
