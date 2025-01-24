@@ -1,12 +1,10 @@
-import os
-import random
 import asyncio
-
+import random
 from datetime import datetime, timedelta
 
-from aiofiles.os import remove
 import pytz
 import requests
+from aiofiles.os import remove
 from PIL import Image, ImageDraw
 from pyrogram import filters
 from pyrogram.enums import ChatType
@@ -184,6 +182,5 @@ Nᴇxᴛ ᴄᴏᴜᴘʟᴇs ᴡɪʟʟ ʙᴇ sᴇʟᴇᴄᴛᴇᴅ ᴏɴ {tomorro
     finally:
         files_to_remove = [p1_path, p2_path, test_image_path, cppic_path]
         await asyncio.gather(
-            *(remove(file) for file in files_to_remove),
-            return_exceptions=True
+            *(remove(file) for file in files_to_remove), return_exceptions=True
         )
