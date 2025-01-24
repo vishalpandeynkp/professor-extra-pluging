@@ -1,7 +1,10 @@
 import os
 import random
+import asyncio
+
 from datetime import datetime, timedelta
 
+from aiofiles.os import remove
 import pytz
 import requests
 from PIL import Image, ImageDraw
@@ -155,13 +158,11 @@ Nᴇxᴛ ᴄᴏᴜᴘʟᴇs ᴡɪʟʟ ʙᴇ sᴇʟᴇᴄᴛᴇᴅ ᴏɴ {tomorro
             c1_name = (await app.get_users(c1_id)).first_name
             c2_name = (await app.get_users(c2_id)).first_name
 
-            TXT = f"""
-**Tᴏᴅᴀʏ's ᴄᴏᴜᴘʟᴇ ᴏғ ᴛʜᴇ ᴅᴀʏ 🎉:
-
-[{c1_name}](tg://openmessage?user_id={c1_id}) + [{c2_name}](tg://openmessage?user_id={c2_id}) = ❣️
-
-Nᴇxᴛ ᴄᴏᴜᴘʟᴇs ᴡɪʟʟ ʙᴇ sᴇʟᴇᴄᴛᴇᴅ ᴏɴ {tomorrow}!!**
-            """
+            TXT = (
+                "**Tᴏᴅᴀʏ's ᴄᴏᴜᴘʟᴇ ᴏғ ᴛʜᴇ ᴅᴀʏ 🎉:"
+                f"[{c1_name}](tg://openmessage?user_id={c1_id}) + [{c2_name}](tg://openmessage?user_id={c2_id}) = ❣️"
+                "Nᴇxᴛ ᴄᴏᴜᴘʟᴇs ᴡɪʟʟ ʙᴇ sᴇʟᴇᴄᴛᴇᴅ ᴏɴ {tomorrow}!!**"
+            )
             await message.reply_photo(
                 b,
                 caption=TXT,
@@ -181,10 +182,8 @@ Nᴇxᴛ ᴄᴏᴜᴘʟᴇs ᴡɪʟʟ ʙᴇ sᴇʟᴇᴄᴛᴇᴅ ᴏɴ {tomorro
     except Exception:
         pass
     finally:
-        try:
-            os.remove(p1_path)
-            os.remove(p2_path)
-            os.remove(test_image_path)
-            os.remove(cppic_path)
-        except Exception:
-            pass
+        files_to_remove = [p1_path, p2_path, test_image_path, cppic_path]
+        await asyncio.gather(
+            *(remove(file) for file in files_to_remove),
+            return_exceptions=True
+        )
