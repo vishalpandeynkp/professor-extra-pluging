@@ -224,8 +224,8 @@ async def admintag_with_reporting(client, message):
             "offmention",
             "mentionoff",
             "cancelall",
-        ],
-        & filters.admin
+        ]
+        & filters.admin,
         prefixes=["/", "@"],
     )
 )
