@@ -452,5 +452,3 @@ def extract_urls(reply_markup):
                         else f"button{i * len(row) + j + 1}"
                     )
                     urls.append((f"{name}", button.text, button.url))
-
-
