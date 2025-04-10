@@ -1,5 +1,5 @@
 from pyrogram import filters
-from YukkiMusic import app
+from professor import app
 
 
 @app.on_message(filters.command("hastag"))
