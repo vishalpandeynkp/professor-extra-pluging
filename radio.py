@@ -1,12 +1,4 @@
-#
-# Copyright (C) 2024 by TheTeamVivek@Github, < https://github.com/TheTeamVivek >.
-#
-# This file is part of < https://github.com/TheTeamVivek/YukkiMusic > project,
-# and is released under the "GNU v3.0 License Agreement".
-# Please see < https://github.com/TheTeamVivek/YukkiMusic/blob/master/LICENSE >
-#
-# All rights reserved.
-#
+
 
 import logging
 
@@ -21,17 +13,17 @@ from pyrogram.errors import (
 )
 from pyrogram.types import Message
 from strings import get_string
-from YukkiMusic import app
-from YukkiMusic.misc import SUDOERS
-from YukkiMusic.utils.database import (
+from professor import app
+from professor.misc import SUDOERS
+from professor.utils.database import (
     get_assistant,
     get_cmode,
     get_lang,
     get_playmode,
     get_playtype,
 )
-from YukkiMusic.utils.logger import play_logs
-from YukkiMusic.utils.stream.stream import stream
+from professor.utils.logger import play_logs
+from professor.utils.stream.stream import stream
 
 RADIO_STATION = {
     "Air Bilaspur": "http://air.pc.cdn.bitgravity.com/air/live/pbaudio110/playlist.m3u8",
