@@ -14,16 +14,16 @@ from pyrogram.types import (
     InlineKeyboardMarkup,
     Message,
 )
-from YukkiMusic import app
-from YukkiMusic.core.mongo import mongodb
-from YukkiMusic.misc import SUDOERS
-from YukkiMusic.utils.database import save_filter
-from YukkiMusic.utils.functions import (
+from professor import app
+from professor.core.mongo import mongodb
+from professor.misc import SUDOERS
+from professor.utils.database import save_filter
+from professor.utils.functions import (
     extract_user,
     extract_user_and_reason,
     time_converter,
 )
-from YukkiMusic.utils.keyboard import ikb
+from professor.utils.keyboard import ikb
 
 warnsdb = mongodb.warns
 
