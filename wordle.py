@@ -1,7 +1,7 @@
 from pyrogram import filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from TheApi import Wordle
-from YukkiMusic import app
+from proffesor import app
 
 wordle = Wordle()
 games = {}
