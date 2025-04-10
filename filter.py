@@ -4,19 +4,19 @@ import re
 from config import BANNED_USERS
 from pyrogram import filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-from YukkiMusic import app
-from YukkiMusic.utils.database import (
+from professor import app
+from professor.utils.database import (
     deleteall_filters,
     get_filter,
     get_filters_names,
     save_filter,
 )
-from YukkiMusic.utils.functions import (
+from professor.utils.functions import (
     check_format,
     extract_text_and_keyb,
     get_data_and_name,
 )
-from YukkiMusic.utils.keyboard import ikb
+from professor.utils.keyboard import ikb
 
 extract_urls = utils.extract_urls
 
